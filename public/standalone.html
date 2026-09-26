@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulasi Fisika: Momentum, Impuls & Tumbukan (Microteaching)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX for Beautiful LaTeX Math Equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="if (window.renderMathInElement) renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    /* Custom styling for inputs and canvas */
+    input[type=range] {
+      accent-color: #4f46e5;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- Header & Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-mono font-bold text-lg shadow-sm">
+            p=mv
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900 text-base sm:text-lg">FisikaLab</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                Microteaching
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">
+              Media Pembelajaran Fisika: Momentum, Impuls & Tumbukan
+            </p>
+          </div>
+        </div>
+
+        <!-- Navigation Segmented Tabs -->
+        <nav class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button id="tab-btn-calc" onclick="switchTab('calculator')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-700 shadow-xs transition-all">
+            Kalkulator & Rumus
+          </button>
+          <button id="tab-btn-sim" onclick="switchTab('simulation')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
+            Simulasi Visual 2D
+          </button>
+          <button id="tab-btn-quiz" onclick="switchTab('quiz')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
+            Kuis Interaktif
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== TAB 1: KALKULATOR & GENERATOR DATA ==================== -->
+    <section id="section-calculator" class="space-y-6">
+      <!-- Quick Presets -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Contoh Benda Nyata:</span>
+        <div class="flex items-center gap-2 overflow-x-auto">
+          <button onclick="setCalcPreset(0.45, 20)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200">⚽ Bola Sepak (0.45kg, 20m/s)</button>
+          <button onclick="setCalcPreset(70, 9)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200">🏃 Pelari (70kg, 9m/s)</button>
+          <button onclick="setCalcPreset(1200, 15)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200">🚗 Mobil (1200kg, 15m/s)</button>
+          <button onclick="setCalcPreset(0.01, 500)" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200">🔫 Peluru (0.01kg, 500m/s)</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Controls Column (5 cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div>
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">
+                Pilih Besaran yang Ingin Dicari:
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <button id="btn-target-p" onclick="setTargetVar('p')" class="py-2.5 px-3 rounded-xl border text-center border-indigo-600 bg-indigo-50 text-indigo-900 font-bold">
+                  <div class="text-sm font-mono">Momentum (p)</div>
+                  <div class="text-[10px] text-slate-500">kg·m/s</div>
+                </button>
+                <button id="btn-target-m" onclick="setTargetVar('m')" class="py-2.5 px-3 rounded-xl border text-center border-slate-200 text-slate-700 bg-white">
+                  <div class="text-sm font-mono">Massa (m)</div>
+                  <div class="text-[10px] text-slate-500">kg</div>
+                </button>
+                <button id="btn-target-v" onclick="setTargetVar('v')" class="py-2.5 px-3 rounded-xl border text-center border-slate-200 text-slate-700 bg-white">
+                  <div class="text-sm font-mono">Kecepatan (v)</div>
+                  <div class="text-[10px] text-slate-500">m/s</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Input Rows -->
+            <div class="space-y-4 pt-2 border-t border-slate-100">
+              <!-- Mass Input -->
+              <div id="row-input-m">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-xs font-semibold text-slate-700">Massa (m):</label>
+                  <span id="label-val-m" class="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">5 kg</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <input id="slider-m" type="range" min="0.1" max="100" step="0.5" value="5" oninput="onInputCalcChange()" class="w-full" />
+                  <input id="num-m" type="number" min="0.01" step="0.5" value="5" oninput="syncFromNum('m')" class="w-20 px-2 py-1 text-xs font-mono border rounded-lg text-right font-medium" />
+                </div>
+              </div>
+
+              <!-- Velocity Input -->
+              <div id="row-input-v">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-xs font-semibold text-slate-700">Kelajuan (v):</label>
+                  <span id="label-val-v" class="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">10 m/s</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <input id="slider-v" type="range" min="0" max="50" step="0.5" value="10" oninput="onInputCalcChange()" class="w-full" />
+                  <input id="num-v" type="number" min="0" step="1" value="10" oninput="syncFromNum('v')" class="w-20 px-2 py-1 text-xs font-mono border rounded-lg text-right font-medium" />
+                </div>
+                <!-- Direction Toggle -->
+                <div class="mt-2 flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
+                  <span class="text-xs text-slate-600 font-medium">Arah Vektor:</span>
+                  <div class="flex items-center gap-1">
+                    <button id="dir-btn-pos" onclick="setDirection(1)" class="px-2.5 py-1 text-xs rounded-md bg-emerald-600 text-white font-bold">→ Kanan (+)</button>
+                    <button id="dir-btn-neg" onclick="setDirection(-1)" class="px-2.5 py-1 text-xs rounded-md bg-white text-slate-600 border border-slate-200 font-medium">← Kiri (-)</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Momentum Input (When searching m or v) -->
+              <div id="row-input-p" class="hidden">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-xs font-semibold text-slate-700">Momentum (p):</label>
+                  <span id="label-val-p" class="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">50 kg·m/s</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <input id="slider-p" type="range" min="1" max="500" step="1" value="50" oninput="onInputCalcChange()" class="w-full" />
+                  <input id="num-p" type="number" min="0" step="5" value="50" oninput="syncFromNum('p')" class="w-20 px-2 py-1 text-xs font-mono border rounded-lg text-right font-medium" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Send to simulation button -->
+            <button onclick="sendValuesToSim()" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-colors">
+              <span>Uji Nilai Ini di Simulasi Visual 2D →</span>
+            </button>
+          </div>
+
+          <!-- Formula Badge -->
+          <div class="bg-slate-900 text-slate-100 p-4 rounded-2xl shadow-xs space-y-1 text-center font-mono">
+            <div class="text-xs text-slate-400">RUMUS DASAR MOMENTUM</div>
+            <div class="text-2xl font-bold text-amber-300 py-1">p = m · v</div>
+            <p class="text-[11px] text-slate-300 font-sans">
+              Momentum berbanding lurus dengan massa dan kecepatan. Satuan SI: kg·m/s atau N·s.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Resolution Column (7 cols) -->
+        <div class="lg:col-span-7 space-y-5">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                Langkah Penyelesaian Ringkas (Papan Demonstrasi Guru)
+              </h3>
+              <span id="badge-target" class="text-xs font-mono font-medium text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md">
+                Target: P
+              </span>
+            </div>
+
+            <!-- Step 1: Diketahui -->
+            <div class="space-y-1">
+              <span class="text-xs font-bold text-slate-500 uppercase">1. Diketahui (Given):</span>
+              <div id="step-given" class="bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 space-y-1">
+                <!-- dynamic -->
+              </div>
+            </div>
+
+            <!-- Step 2: Ditanyakan -->
+            <div class="space-y-1">
+              <span class="text-xs font-bold text-slate-500 uppercase">2. Ditanyakan:</span>
+              <div id="step-asked" class="bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono text-xs text-slate-800">
+                <!-- dynamic -->
+              </div>
+            </div>
+
+            <!-- Step 3: Rumus & Turunan -->
+            <div class="space-y-1">
+              <span class="text-xs font-bold text-slate-500 uppercase">3. Rumus Fisika & Aljabar:</span>
+              <div id="step-formula" class="bg-indigo-50/70 p-3 rounded-xl border border-indigo-100 font-mono text-xs text-indigo-950 font-bold">
+                <!-- dynamic -->
+              </div>
+            </div>
+
+            <!-- Step 4: Substitusi -->
+            <div class="space-y-1">
+              <span class="text-xs font-bold text-slate-500 uppercase">4. Substitusi & Perhitungan:</span>
+              <div id="step-subst" class="bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono text-xs text-slate-800">
+                <!-- dynamic -->
+              </div>
+            </div>
+
+            <!-- Step 5: Hasil Akhir -->
+            <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-1">
+              <span class="text-xs font-bold text-emerald-900 uppercase">5. Hasil Akhir & Makna Fisis:</span>
+              <div id="step-result" class="text-base sm:text-lg font-bold font-mono text-emerald-950">
+                <!-- dynamic -->
+              </div>
+              <p id="step-kinetic" class="text-xs text-emerald-800">
+                <!-- dynamic -->
+              </p>
+            </div>
+          </div>
+
+          <!-- Variation Table Generator -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <h4 class="font-bold text-slate-900 text-sm">Tabel Generator Data: Membuktikan Hubungan Linear (p ∝ v)</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs font-mono text-left">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-600 border-b">
+                    <th class="py-2 px-3">No</th>
+                    <th class="py-2 px-3">Massa (m)</th>
+                    <th class="py-2 px-3">Kecepatan (v)</th>
+                    <th class="py-2 px-3">Momentum (p = m·v)</th>
+                  </tr>
+                </thead>
+                <tbody id="variation-table-body" class="divide-y divide-slate-100">
+                  <!-- dynamic -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: SIMULASI VISUAL 2D CANVAS ==================== -->
+    <section id="section-simulation" class="hidden space-y-5">
+      <!-- Presets bar -->
+      <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-2">
+        <span class="text-xs font-bold text-slate-800 uppercase">Preset Simulasi:</span>
+        <div class="flex items-center gap-2 overflow-x-auto">
+          <button onclick="applySimPreset('heavy_light')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200">Truk Lambat vs Mobil Cepat</button>
+          <button onclick="applySimPreset('transfer')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200">Transfer Momentum Penuh (e=1)</button>
+          <button onclick="applySimPreset('sticky')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200">Tumbukan Menempel (e=0)</button>
+        </div>
+      </div>
+
+      <!-- Canvas Viewport -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <!-- Canvas Header -->
+        <div class="bg-slate-900 text-slate-100 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="btn-mode-single" onclick="setSimMode('single')" class="px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white">
+              1. Analisis 1 Benda
+            </button>
+            <button id="btn-mode-two" onclick="setSimMode('two_carts')" class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:text-white">
+              2. Tumbukan 2 Benda
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-emerald-400 font-mono font-medium">Panah Hijau: Momentum (p)</span>
+            <span class="text-slate-400">|</span>
+            <span class="text-sky-400 font-mono font-medium">Panah Biru: Kecepatan (v)</span>
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="relative w-full h-[300px] sm:h-[350px] bg-slate-50">
+          <canvas id="physics-canvas" class="w-full h-full block"></canvas>
+
+          <!-- Telemetry HUD -->
+          <div class="absolute top-3 left-3 bg-white/95 p-3 rounded-xl border border-slate-200 shadow-xs text-xs font-mono space-y-1">
+            <div class="text-[10px] font-bold text-slate-500 uppercase font-sans">Telemetri Live:</div>
+            <div id="hud-benda1" class="text-indigo-700 font-bold">Benda 1: p = 0 kg·m/s</div>
+            <div id="hud-benda2" class="text-sky-700 font-bold hidden">Benda 2: p = 0 kg·m/s</div>
+            <div id="hud-total" class="pt-1 border-t border-slate-100 text-slate-900 font-bold hidden">Total p = 0 kg·m/s</div>
+          </div>
+        </div>
+
+        <!-- Canvas Bottom Controls -->
+        <div class="bg-slate-100 border-t border-slate-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="btn-play-pause" onclick="togglePlay()" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-xs">
+              Jeda
+            </button>
+            <button onclick="resetSim()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-medium">
+              Reset
+            </button>
+            <div class="flex items-center bg-white rounded-xl border border-slate-200 p-0.5 text-xs font-mono">
+              <button onclick="setSimSpeed(0.25)" class="px-2 py-1 rounded hover:bg-slate-100">0.25x</button>
+              <button onclick="setSimSpeed(0.5)" class="px-2 py-1 rounded hover:bg-slate-100">0.5x</button>
+              <button onclick="setSimSpeed(1.0)" class="px-2 py-1 rounded bg-indigo-600 text-white font-bold">1x</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 text-xs">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input id="check-wall-bounce" type="checkbox" checked class="accent-indigo-600" />
+              <span>Pantulan Dinding</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sliders for Object 1 and Object 2 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Object 1 -->
+        <div class="bg-white p-5 rounded-2xl border border-indigo-200 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h4 class="font-bold text-slate-900 text-sm">Benda 1 (Ungu / A)</h4>
+            <span id="sim-badge-p1" class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">p = 20 kg·m/s</span>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span>Massa (m₁):</span>
+              <span id="sim-txt-m1" class="font-mono font-bold">4 kg</span>
+            </div>
+            <input id="sim-slider-m1" type="range" min="0.5" max="20" step="0.5" value="4" oninput="updateSimParams()" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span>Kecepatan Awal (v₁):</span>
+              <span id="sim-txt-v1" class="font-mono font-bold">5 m/s</span>
+            </div>
+            <input id="sim-slider-v1" type="range" min="-15" max="15" step="0.5" value="5" oninput="updateSimParams()" class="w-full" />
+          </div>
+          <!-- Object 1 Visual Selector -->
+          <div class="pt-2 border-t">
+            <span class="text-xs font-semibold text-slate-700 block mb-1">Bentuk Visual Benda 1:</span>
+            <div class="grid grid-cols-3 gap-1 text-xs">
+              <button id="visual1-cart" onclick="setObjectVisual(1, 'cart')" class="py-1 px-1.5 border rounded-lg bg-indigo-50 border-indigo-600 font-bold text-center">🛒 Troli</button>
+              <button id="visual1-ball" onclick="setObjectVisual(1, 'ball')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">⚽ Bola</button>
+              <button id="visual1-runner" onclick="setObjectVisual(1, 'runner')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🏃 Pelari</button>
+              <button id="visual1-car" onclick="setObjectVisual(1, 'car')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🚗 Mobil</button>
+              <button id="visual1-truck" onclick="setObjectVisual(1, 'truck')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🚛 Truk</button>
+              <button id="visual1-bullet" onclick="setObjectVisual(1, 'bullet')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🔫 Peluru</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Object 2 -->
+        <div id="sim-card-benda2" class="bg-white p-5 rounded-2xl border border-sky-200 shadow-xs space-y-3 opacity-50 pointer-events-none">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h4 class="font-bold text-slate-900 text-sm">Benda 2 (Biru / B)</h4>
+            <span id="sim-badge-p2" class="text-xs font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">p = -6 kg·m/s</span>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span>Massa (m₂):</span>
+              <span id="sim-txt-m2" class="font-mono font-bold">2 kg</span>
+            </div>
+            <input id="sim-slider-m2" type="range" min="0.5" max="20" step="0.5" value="2" oninput="updateSimParams()" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span>Kecepatan Awal (v₂):</span>
+              <span id="sim-txt-v2" class="font-mono font-bold">-3 m/s</span>
+            </div>
+            <input id="sim-slider-v2" type="range" min="-15" max="15" step="0.5" value="-3" oninput="updateSimParams()" class="w-full" />
+          </div>
+          <!-- Object 2 Visual Selector -->
+          <div class="pt-2 border-t">
+            <span class="text-xs font-semibold text-slate-700 block mb-1">Bentuk Visual Benda 2:</span>
+            <div class="grid grid-cols-3 gap-1 text-xs">
+              <button id="visual2-cart" onclick="setObjectVisual(2, 'cart')" class="py-1 px-1.5 border rounded-lg bg-sky-50 border-sky-600 font-bold text-center">🛒 Troli</button>
+              <button id="visual2-ball" onclick="setObjectVisual(2, 'ball')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">⚽ Bola</button>
+              <button id="visual2-runner" onclick="setObjectVisual(2, 'runner')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🏃 Pelari</button>
+              <button id="visual2-car" onclick="setObjectVisual(2, 'car')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🚗 Mobil</button>
+              <button id="visual2-truck" onclick="setObjectVisual(2, 'truck')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🚛 Truk</button>
+              <button id="visual2-bullet" onclick="setObjectVisual(2, 'bullet')" class="py-1 px-1.5 border rounded-lg border-slate-200 text-center">🔫 Peluru</button>
+            </div>
+          </div>
+          <!-- Restitution -->
+          <div class="pt-2 border-t">
+            <span class="text-xs font-semibold text-slate-700 block mb-1">Jenis Tumbukan:</span>
+            <div class="grid grid-cols-3 gap-1.5 text-xs">
+              <button id="res-elastic" onclick="setRestitution('elastic')" class="py-1 px-2 border rounded-lg bg-indigo-50 border-indigo-600 font-bold">Lenting (e=1)</button>
+              <button id="res-inelastic" onclick="setRestitution('inelastic')" class="py-1 px-2 border rounded-lg border-slate-200">Sebagian (e=0.5)</button>
+              <button id="res-sticky" onclick="setRestitution('sticky')" class="py-1 px-2 border rounded-lg border-slate-200">Menempel (e=0)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: KUIS INTERAKTIF ==================== -->
+    <section id="section-quiz" class="hidden max-w-3xl mx-auto space-y-6">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Kuis Evaluasi & Studi Kasus</h3>
+          <p class="text-xs text-slate-500">Uji pemahaman dan analisis miskonsepsi fisika</p>
+        </div>
+        <div id="quiz-score-badge" class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-lg">
+          Skor: 0 / 5
+        </div>
+      </div>
+
+      <div id="quiz-container" class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+        <!-- Question content injected by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Single Standalone JavaScript Engine -->
+  <script>
+    // TAB SWITCHING
+    let currentTab = 'calculator';
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.getElementById('section-calculator').classList.toggle('hidden', tabId !== 'calculator');
+      document.getElementById('section-simulation').classList.toggle('hidden', tabId !== 'simulation');
+      document.getElementById('section-quiz').classList.toggle('hidden', tabId !== 'quiz');
+
+      const tabs = ['calc', 'sim', 'quiz'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        const isActive = (tabId === 'calculator' && t === 'calc') || (tabId === 'simulation' && t === 'sim') || (tabId === 'quiz' && t === 'quiz');
+        if (isActive) {
+          btn.className = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-700 shadow-xs transition-all';
+        } else {
+          btn.className = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-all';
+        }
+      });
+    }
+
+    // ==================== KALKULATOR LOGIC ====================
+    let targetVar = 'p';
+    let calcM = 5;
+    let calcV = 10;
+    let calcP = 50;
+    let calcDir = 1;
+
+    function setTargetVar(v) {
+      targetVar = v;
+      ['p', 'm', 'v'].forEach(id => {
+        const btn = document.getElementById('btn-target-' + id);
+        if (id === v) {
+          btn.className = 'py-2.5 px-3 rounded-xl border text-center border-indigo-600 bg-indigo-50 text-indigo-900 font-bold';
+        } else {
+          btn.className = 'py-2.5 px-3 rounded-xl border text-center border-slate-200 text-slate-700 bg-white';
+        }
+      });
+
+      document.getElementById('row-input-m').classList.toggle('hidden', v === 'm');
+      document.getElementById('row-input-v').classList.toggle('hidden', v === 'v');
+      document.getElementById('row-input-p').classList.toggle('hidden', v === 'p');
+      document.getElementById('badge-target').textContent = 'Target: ' + v.toUpperCase();
+      renderCalculator();
+    }
+
+    function setDirection(d) {
+      calcDir = d;
+      document.getElementById('dir-btn-pos').className = d === 1 ? 'px-2.5 py-1 text-xs rounded-md bg-emerald-600 text-white font-bold' : 'px-2.5 py-1 text-xs rounded-md bg-white text-slate-600 border border-slate-200 font-medium';
+      document.getElementById('dir-btn-neg').className = d === -1 ? 'px-2.5 py-1 text-xs rounded-md bg-rose-600 text-white font-bold' : 'px-2.5 py-1 text-xs rounded-md bg-white text-slate-600 border border-slate-200 font-medium';
+      renderCalculator();
+    }
+
+    function onInputCalcChange() {
+      calcM = parseFloat(document.getElementById('slider-m').value) || 0.1;
+      calcV = parseFloat(document.getElementById('slider-v').value) || 0;
+      calcP = parseFloat(document.getElementById('slider-p').value) || 1;
+
+      document.getElementById('num-m').value = calcM;
+      document.getElementById('num-v').value = calcV;
+      document.getElementById('num-p').value = calcP;
+
+      document.getElementById('label-val-m').textContent = calcM + ' kg';
+      document.getElementById('label-val-v').textContent = calcV + ' m/s';
+      document.getElementById('label-val-p').textContent = calcP + ' kg·m/s';
+      renderCalculator();
+    }
+
+    function syncFromNum(type) {
+      if (type === 'm') {
+        calcM = parseFloat(document.getElementById('num-m').value) || 0.1;
+        document.getElementById('slider-m').value = calcM;
+        document.getElementById('label-val-m').textContent = calcM + ' kg';
+      } else if (type === 'v') {
+        calcV = parseFloat(document.getElementById('num-v').value) || 0;
+        document.getElementById('slider-v').value = calcV;
+        document.getElementById('label-val-v').textContent = calcV + ' m/s';
+      } else if (type === 'p') {
+        calcP = parseFloat(document.getElementById('num-p').value) || 1;
+        document.getElementById('slider-p').value = calcP;
+        document.getElementById('label-val-p').textContent = calcP + ' kg·m/s';
+      }
+      renderCalculator();
+    }
+
+    function setCalcPreset(m, v) {
+      calcM = m;
+      calcV = v;
+      calcP = m * v;
+      calcDir = 1;
+      document.getElementById('slider-m').value = m;
+      document.getElementById('num-m').value = m;
+      document.getElementById('label-val-m').textContent = m + ' kg';
+      document.getElementById('slider-v').value = v;
+      document.getElementById('num-v').value = v;
+      document.getElementById('label-val-v').textContent = v + ' m/s';
+      setTargetVar('p');
+      renderCalculator();
+    }
+
+    function renderCalculator() {
+      const effectiveV = calcV * calcDir;
+      let finalP = 0, finalM = 0, finalV = 0;
+
+      if (targetVar === 'p') {
+        finalP = calcM * effectiveV;
+        document.getElementById('step-given').innerHTML = `• Massa (m) = ${calcM} kg<br>• Kecepatan (v) = ${effectiveV} m/s (${calcDir === 1 ? 'ke kanan / +' : 'ke kiri / -'})`;
+        document.getElementById('step-asked').innerHTML = 'Besar dan arah momentum benda (p) = ... ?';
+        document.getElementById('step-formula').innerHTML = 'p = m · v';
+        document.getElementById('step-subst').innerHTML = `p = (${calcM} kg) × (${effectiveV} m/s) = <span class="font-bold text-indigo-700">${finalP.toFixed(2)}</span> kg·m/s`;
+        document.getElementById('step-result').innerHTML = `p = ${finalP.toFixed(2)} kg·m/s (${finalP >= 0 ? 'Bergerak ke Kanan' : 'Bergerak ke Kiri'})`;
+        document.getElementById('step-kinetic').innerHTML = `Energi Kinetik: <strong>${(0.5 * calcM * effectiveV * effectiveV).toFixed(1)} Joule</strong>`;
+      } else if (targetVar === 'm') {
+        finalM = calcV === 0 ? 0 : Math.abs(calcP / calcV);
+        document.getElementById('step-given').innerHTML = `• Momentum (p) = ${calcP} kg·m/s<br>• Kecepatan (v) = ${calcV} m/s`;
+        document.getElementById('step-asked').innerHTML = 'Massa benda (m) = ... ?';
+        document.getElementById('step-formula').innerHTML = 'p = m · v ⟹ m = p / v';
+        document.getElementById('step-subst').innerHTML = `m = (${calcP} kg·m/s) ÷ (${calcV} m/s) = <span class="font-bold text-indigo-700">${finalM.toFixed(2)}</span> kg`;
+        document.getElementById('step-result').innerHTML = `m = ${finalM.toFixed(2)} kg`;
+        document.getElementById('step-kinetic').innerHTML = `Energi Kinetik: <strong>${(0.5 * finalM * calcV * calcV).toFixed(1)} Joule</strong>`;
+      } else if (targetVar === 'v') {
+        finalV = calcM === 0 ? 0 : calcP / calcM;
+        document.getElementById('step-given').innerHTML = `• Momentum (p) = ${calcP} kg·m/s<br>• Massa (m) = ${calcM} kg`;
+        document.getElementById('step-asked').innerHTML = 'Kecepatan benda (v) = ... ?';
+        document.getElementById('step-formula').innerHTML = 'p = m · v ⟹ v = p / m';
+        document.getElementById('step-subst').innerHTML = `v = (${calcP} kg·m/s) ÷ (${calcM} kg) = <span class="font-bold text-indigo-700">${finalV.toFixed(2)}</span> m/s`;
+        document.getElementById('step-result').innerHTML = `v = ${finalV.toFixed(2)} m/s`;
+        document.getElementById('step-kinetic').innerHTML = `Energi Kinetik: <strong>${(0.5 * calcM * finalV * finalV).toFixed(1)} Joule</strong>`;
+      }
+
+      // Variation Table
+      const tbody = document.getElementById('variation-table-body');
+      tbody.innerHTML = '';
+      const baseM = targetVar === 'm' ? finalM : calcM;
+      const baseV = targetVar === 'v' ? Math.abs(finalV) : calcV;
+      [1, 2, 3, 4, 5].forEach(step => {
+        const curV = baseV * (step * 0.5);
+        const curP = baseM * curV;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-3 text-slate-400 font-semibold">${step}</td>
+          <td class="py-2 px-3">${baseM.toFixed(1)} kg</td>
+          <td class="py-2 px-3">${curV.toFixed(1)} m/s</td>
+          <td class="py-2 px-3 font-bold text-indigo-700">${curP.toFixed(1)} kg·m/s</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function sendValuesToSim() {
+      const m = targetVar === 'm' ? (parseFloat(document.getElementById('step-result').textContent.replace(/[^\d.]/g, '')) || 5) : calcM;
+      const v = targetVar === 'v' ? (parseFloat(document.getElementById('step-result').textContent.replace(/[^\d.]/g, '')) || 10) : calcV * calcDir;
+      simM1 = m;
+      simV1 = v;
+      document.getElementById('sim-slider-m1').value = m;
+      document.getElementById('sim-slider-v1').value = v;
+      updateSimParams();
+      resetSim();
+      switchTab('simulation');
+    }
+
+    // ==================== SIMULATION LOGIC ====================
+    let simMode = 'single';
+    let isPlaying = true;
+    let simSpeedVal = 1.0;
+    let collisionTypeVal = 'elastic';
+
+    let simM1 = 4, simV1 = 5;
+    let simM2 = 2, simV2 = -3;
+    let pos1 = 3.5, vel1 = 5;
+    let pos2 = 11.5, vel2 = -3;
+    let objectVisual1 = 'cart';
+    let objectVisual2 = 'cart';
+
+    function setObjectVisual(objIndex, type) {
+      if (objIndex === 1) {
+        objectVisual1 = type;
+        ['cart', 'ball', 'runner', 'car', 'truck', 'bullet'].forEach(t => {
+          const el = document.getElementById('visual1-' + t);
+          if (el) el.className = t === type ? 'py-1 px-1.5 border rounded-lg bg-indigo-50 border-indigo-600 font-bold text-center' : 'py-1 px-1.5 border rounded-lg border-slate-200 text-center';
+        });
+      } else {
+        objectVisual2 = type;
+        ['cart', 'ball', 'runner', 'car', 'truck', 'bullet'].forEach(t => {
+          const el = document.getElementById('visual2-' + t);
+          if (el) el.className = t === type ? 'py-1 px-1.5 border rounded-lg bg-sky-50 border-sky-600 font-bold text-center' : 'py-1 px-1.5 border rounded-lg border-slate-200 text-center';
+        });
+      }
+    }
+
+    function setSimMode(m) {
+      simMode = m;
+      document.getElementById('btn-mode-single').className = m === 'single' ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white' : 'px-3 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:text-white';
+      document.getElementById('btn-mode-two').className = m === 'two_carts' ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white' : 'px-3 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:text-white';
+      document.getElementById('hud-benda2').classList.toggle('hidden', m !== 'two_carts');
+      document.getElementById('hud-total').classList.toggle('hidden', m !== 'two_carts');
+      
+      const card2 = document.getElementById('sim-card-benda2');
+      if (m === 'two_carts') {
+        card2.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        card2.classList.add('opacity-50', 'pointer-events-none');
+      }
+      resetSim();
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      document.getElementById('btn-play-pause').textContent = isPlaying ? 'Jeda' : 'Jalankan';
+      document.getElementById('btn-play-pause').className = isPlaying ? 'px-3 py-1.5 rounded-xl bg-amber-600 text-white font-semibold text-xs shadow-xs' : 'px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-xs';
+    }
+
+    function setSimSpeed(s) {
+      simSpeedVal = s;
+    }
+
+    function setRestitution(t) {
+      collisionTypeVal = t;
+      ['elastic', 'inelastic', 'sticky'].forEach(type => {
+        const btn = document.getElementById('res-' + type);
+        btn.className = type === t ? 'py-1 px-2 border rounded-lg bg-indigo-50 border-indigo-600 font-bold' : 'py-1 px-2 border rounded-lg border-slate-200';
+      });
+    }
+
+    function updateSimParams() {
+      simM1 = parseFloat(document.getElementById('sim-slider-m1').value);
+      simV1 = parseFloat(document.getElementById('sim-slider-v1').value);
+      simM2 = parseFloat(document.getElementById('sim-slider-m2').value);
+      simV2 = parseFloat(document.getElementById('sim-slider-v2').value);
+
+      document.getElementById('sim-txt-m1').textContent = simM1 + ' kg';
+      document.getElementById('sim-txt-v1').textContent = simV1 + ' m/s';
+      document.getElementById('sim-txt-m2').textContent = simM2 + ' kg';
+      document.getElementById('sim-txt-v2').textContent = simV2 + ' m/s';
+
+      document.getElementById('sim-badge-p1').textContent = 'p = ' + (simM1 * simV1).toFixed(1) + ' kg·m/s';
+      document.getElementById('sim-badge-p2').textContent = 'p = ' + (simM2 * simV2).toFixed(1) + ' kg·m/s';
+      resetSim();
+    }
+
+    function resetSim() {
+      pos1 = 3.5;
+      vel1 = simV1;
+      pos2 = 11.5;
+      vel2 = simV2;
+    }
+
+    function applySimPreset(type) {
+      if (type === 'heavy_light') {
+        setSimMode('single');
+        simM1 = 10;
+        simV1 = 2;
+        document.getElementById('sim-slider-m1').value = 10;
+        document.getElementById('sim-slider-v1').value = 2;
+      } else if (type === 'transfer') {
+        setSimMode('two_carts');
+        simM1 = 2; simV1 = 6;
+        simM2 = 2; simV2 = 0;
+        setRestitution('elastic');
+        document.getElementById('sim-slider-m1').value = 2;
+        document.getElementById('sim-slider-v1').value = 6;
+        document.getElementById('sim-slider-m2').value = 2;
+        document.getElementById('sim-slider-v2').value = 0;
+      } else if (type === 'sticky') {
+        setSimMode('two_carts');
+        simM1 = 3; simV1 = 5;
+        simM2 = 1; simV2 = -3;
+        setRestitution('sticky');
+        document.getElementById('sim-slider-m1').value = 3;
+        document.getElementById('sim-slider-v1').value = 5;
+        document.getElementById('sim-slider-m2').value = 1;
+        document.getElementById('sim-slider-v2').value = -3;
+      }
+      updateSimParams();
+      isPlaying = true;
+      document.getElementById('btn-play-pause').textContent = 'Jeda';
+    }
+
+    // Canvas render loop
+    const canvas = document.getElementById('physics-canvas');
+    const ctx = canvas.getContext('2d');
+    const trackLength = 16; // meters
+
+    let lastTime = performance.now();
+    function animate(time) {
+      const dtRaw = (time - lastTime) / 1000;
+      lastTime = time;
+      const dt = Math.min(0.08, dtRaw) * simSpeedVal;
+
+      if (isPlaying) {
+        pos1 += vel1 * dt;
+        if (simMode === 'two_carts') {
+          pos2 += vel2 * dt;
+          // Collision between Cart 1 and 2
+          const w1 = 1.0 + Math.cbrt(simM1) * 0.4;
+          const w2 = 1.0 + Math.cbrt(simM2) * 0.4;
+          const dist = pos2 - pos1;
+          const minDist = (w1 + w2) / 2;
+          if (dist <= minDist && (vel1 - vel2) > 0) {
+            let e = collisionTypeVal === 'elastic' ? 1.0 : (collisionTypeVal === 'inelastic' ? 0.5 : 0.0);
+            if (e === 0.0) {
+              const vCommon = (simM1 * vel1 + simM2 * vel2) / (simM1 + simM2);
+              vel1 = vCommon; vel2 = vCommon;
+            } else {
+              const u1 = vel1, u2 = vel2;
+              vel1 = ((simM1 - e * simM2) * u1 + (1 + e) * simM2 * u2) / (simM1 + simM2);
+              vel2 = ((simM2 - e * simM1) * u2 + (1 + e) * simM1 * u1) / (simM1 + simM2);
+            }
+          }
+          // Cart 2 bounce
+          if (pos2 + w2/2 >= 15.5 && vel2 > 0) { vel2 = -vel2; pos2 = 15.5 - w2/2; }
+          if (pos2 - w2/2 <= 0.5 && vel2 < 0) { vel2 = -vel2; pos2 = 0.5 + w2/2; }
+        }
+        // Cart 1 bounce
+        const w1 = 1.0 + Math.cbrt(simM1) * 0.4;
+        if (pos1 - w1/2 <= 0.5 && vel1 < 0) { vel1 = -vel1; pos1 = 0.5 + w1/2; }
+        if (pos1 + w1/2 >= 15.5 && vel1 > 0) { vel1 = -vel1; pos1 = 15.5 - w1/2; }
+      }
+
+      // Draw canvas
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+      }
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      const marginX = 35;
+      const usableW = w - marginX * 2;
+      const scaleX = usableW / trackLength;
+      const trackY = h * 0.62;
+
+      // Track
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(marginX - 10, trackY, usableW + 20, 14);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(marginX - 10, trackY, usableW + 20, 3);
+
+      // Ruler marks
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      for (let m = 0; m <= trackLength; m += 2) {
+        const rx = marginX + m * scaleX;
+        ctx.fillRect(rx - 1, trackY + 14, 2, 8);
+        ctx.fillText(m + 'm', rx, trackY + 32);
+      }
+
+      function drawSimObject(xPos, mass, velocity, color, label, visual) {
+        const px = marginX + xPos * scaleX;
+        const facing = velocity >= 0 ? 1 : -1;
+        let topY = trackY - 45;
+
+        ctx.save();
+
+        if (visual === 'ball') {
+          // ⚽ Bola Sepak
+          const radius = Math.min(30, Math.max(16, 14 + Math.cbrt(mass) * 3));
+          const ballCenterY = trackY - radius;
+          topY = ballCenterY - radius;
+          const rotation = (xPos * scaleX) / radius;
+
+          // Shadow
+          ctx.beginPath();
+          ctx.ellipse(px, trackY + 1, radius * 0.75, 3.5, 0, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+          ctx.fill();
+
+          ctx.save();
+          ctx.translate(px, ballCenterY);
+          ctx.rotate(rotation);
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Pentagon
+          const pR = radius * 0.38;
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const a = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+            const vx = pR * Math.cos(a);
+            const vy = pR * Math.sin(a);
+            if (i === 0) ctx.moveTo(vx, vy);
+            else ctx.lineTo(vx, vy);
+          }
+          ctx.closePath();
+          ctx.fillStyle = '#1e293b';
+          ctx.fill();
+
+          for (let i = 0; i < 5; i++) {
+            const a1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(pR * Math.cos(a1), pR * Math.sin(a1));
+            ctx.lineTo(radius * Math.cos(a1), radius * Math.sin(a1));
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // Gloss highlight
+          ctx.beginPath();
+          ctx.arc(px - radius * 0.35, ballCenterY - radius * 0.35, radius * 0.28, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.fill();
+
+        } else if (visual === 'runner') {
+          // 🏃 Pelari
+          const runnerH = Math.min(68, Math.max(50, 46 + Math.cbrt(mass) * 3));
+          topY = trackY - runnerH;
+          const isMoving = Math.abs(velocity) > 0.05;
+          const phase = isMoving ? xPos * 8 : 0;
+          const legSwing = Math.sin(phase);
+          const armSwing = Math.cos(phase);
+
+          ctx.beginPath();
+          ctx.ellipse(px, trackY + 1, 16, 3.5, 0, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+          ctx.fill();
+
+          ctx.save();
+          ctx.translate(px, trackY);
+          ctx.scale(facing, 1);
+
+          ctx.strokeStyle = '#334155'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(-2, -runnerH * 0.44); ctx.lineTo(-legSwing * 12 - 4, -runnerH * 0.22); ctx.lineTo(-legSwing * 18 - 6, -3); ctx.stroke();
+          ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.ellipse(-legSwing * 18 - 6, -2, 5.5, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+
+          ctx.strokeStyle = '#475569'; ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.moveTo(0, -runnerH * 0.72); ctx.lineTo(-armSwing * 12 - 4, -runnerH * 0.58); ctx.lineTo(-armSwing * 16 - 8, -runnerH * 0.46); ctx.stroke();
+
+          ctx.fillStyle = color;
+          ctx.beginPath(); ctx.moveTo(-6, -runnerH * 0.42); ctx.lineTo(6, -runnerH * 0.42); ctx.lineTo(8, -runnerH * 0.76); ctx.lineTo(-6, -runnerH * 0.76); ctx.closePath(); ctx.fill();
+
+          ctx.fillStyle = '#0f172a'; ctx.fillRect(-7, -runnerH * 0.46, 14, runnerH * 0.12);
+          ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.arc(3, -runnerH * 0.88, 7.5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(1, -runnerH * 0.92, 7, Math.PI * 0.7, Math.PI * 1.8); ctx.fill();
+
+          ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4.5;
+          ctx.beginPath(); ctx.moveTo(2, -runnerH * 0.44); ctx.lineTo(legSwing * 14 + 4, -runnerH * 0.22); ctx.lineTo(legSwing * 18 + 6, -3); ctx.stroke();
+          ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.ellipse(legSwing * 18 + 6, -2, 5.5, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+
+          ctx.strokeStyle = '#334155'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(4, -runnerH * 0.72); ctx.lineTo(armSwing * 14 + 6, -runnerH * 0.58); ctx.lineTo(armSwing * 18 + 10, -runnerH * 0.46); ctx.stroke();
+          ctx.restore();
+
+        } else if (visual === 'car') {
+          // 🚗 Mobil
+          const carW = Math.min(105, Math.max(72, 65 + Math.cbrt(mass) * 5));
+          const carH = 34 + Math.cbrt(mass) * 2;
+          topY = trackY - carH - 8;
+
+          ctx.beginPath();
+          ctx.ellipse(px, trackY + 1, carW * 0.52, 4, 0, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+          ctx.fill();
+
+          ctx.save();
+          ctx.translate(px, trackY);
+          ctx.scale(facing, 1);
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.moveTo(-carW * 0.48, -10); ctx.lineTo(-carW * 0.48, -carH * 0.48); ctx.lineTo(-carW * 0.30, -carH * 0.52);
+          ctx.lineTo(-carW * 0.16, -carH); ctx.lineTo(carW * 0.14, -carH); ctx.lineTo(carW * 0.32, -carH * 0.48);
+          ctx.lineTo(carW * 0.48, -carH * 0.40); ctx.lineTo(carW * 0.48, -10); ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#7dd3fc';
+          ctx.beginPath();
+          ctx.moveTo(-carW * 0.13, -carH * 0.90); ctx.lineTo(-carW * 0.02, -carH * 0.90); ctx.lineTo(-carW * 0.02, -carH * 0.54); ctx.lineTo(-carW * 0.24, -carH * 0.54); ctx.closePath(); ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(carW * 0.02, -carH * 0.90); ctx.lineTo(carW * 0.11, -carH * 0.90); ctx.lineTo(carW * 0.26, -carH * 0.54); ctx.lineTo(carW * 0.02, -carH * 0.54); ctx.closePath(); ctx.fill();
+
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(carW * 0.42, -carH * 0.42, carW * 0.06, 7);
+
+          const wheelR = 8;
+          [-carW * 0.28, carW * 0.28].forEach((wx) => {
+            ctx.beginPath(); ctx.arc(wx, -wheelR + 1, wheelR, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill();
+            ctx.beginPath(); ctx.arc(wx, -wheelR + 1, 4, 0, Math.PI * 2); ctx.fillStyle = '#cbd5e1'; ctx.fill();
+          });
+          ctx.restore();
+
+        } else if (visual === 'truck') {
+          // 🚛 Truk
+          const truckW = Math.min(136, Math.max(94, 85 + Math.cbrt(mass) * 5));
+          const truckH = 48 + Math.cbrt(mass) * 2.5;
+          topY = trackY - truckH - 8;
+
+          ctx.beginPath();
+          ctx.ellipse(px, trackY + 1, truckW * 0.52, 4.5, 0, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.3)';
+          ctx.fill();
+
+          ctx.save();
+          ctx.translate(px, trackY);
+          ctx.scale(facing, 1);
+
+          const cabW = truckW * 0.32;
+          const cargoW = truckW * 0.63;
+          const cargoX = -truckW * 0.48;
+
+          ctx.fillStyle = '#475569';
+          ctx.beginPath(); ctx.roundRect(cargoX, -truckH, cargoW, truckH - 8, 3); ctx.fill();
+
+          const cabX = cargoX + cargoW + 4;
+          ctx.fillStyle = color;
+          ctx.beginPath(); ctx.moveTo(cabX, -10); ctx.lineTo(cabX + cabW, -10); ctx.lineTo(cabX + cabW, -truckH * 0.65);
+          ctx.lineTo(cabX + cabW * 0.68, -truckH * 0.88); ctx.lineTo(cabX, -truckH * 0.88); ctx.closePath(); ctx.fill();
+
+          ctx.fillStyle = '#7dd3fc';
+          ctx.beginPath(); ctx.moveTo(cabX + cabW * 0.15, -truckH * 0.84); ctx.lineTo(cabX + cabW * 0.65, -truckH * 0.84);
+          ctx.lineTo(cabX + cabW * 0.90, -truckH * 0.68); ctx.lineTo(cabX + cabW * 0.15, -truckH * 0.68); ctx.closePath(); ctx.fill();
+
+          const wheelR = 9;
+          [cargoX + 16, cargoX + 38, cabX + cabW * 0.6].forEach((wx) => {
+            ctx.beginPath(); ctx.arc(wx, -wheelR + 1, wheelR, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill();
+            ctx.beginPath(); ctx.arc(wx, -wheelR + 1, 4.5, 0, Math.PI * 2); ctx.fillStyle = '#94a3b8'; ctx.fill();
+          });
+          ctx.restore();
+
+        } else if (visual === 'bullet') {
+          // 🔫 Peluru
+          const bulletW = Math.min(48, Math.max(30, 26 + Math.cbrt(mass) * 3));
+          const bulletH = 16 + Math.cbrt(mass) * 2;
+          const centerY = trackY - 26;
+          topY = centerY - bulletH / 2;
+
+          ctx.save();
+          ctx.translate(px, centerY);
+          ctx.scale(facing, 1);
+
+          const grad = ctx.createLinearGradient(0, -bulletH / 2, 0, bulletH / 2);
+          grad.addColorStop(0, '#fef08a'); grad.addColorStop(0.4, '#f59e0b'); grad.addColorStop(1, '#9a3412');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(-bulletW * 0.5, -bulletH * 0.5); ctx.lineTo(bulletW * 0.1, -bulletH * 0.5);
+          ctx.quadraticCurveTo(bulletW * 0.58, 0, bulletW * 0.5, 0);
+          ctx.quadraticCurveTo(bulletW * 0.58, 0, bulletW * 0.1, bulletH * 0.5);
+          ctx.lineTo(-bulletW * 0.5, bulletH * 0.5); ctx.closePath(); ctx.fill();
+          ctx.restore();
+
+        } else {
+          // 🛒 Troli
+          const bWidth = (1.0 + Math.cbrt(mass) * 0.4) * scaleX;
+          const bHeight = 36 + Math.cbrt(mass) * 5;
+          topY = trackY - bHeight - 8;
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.roundRect(px - bWidth/2, topY, bWidth, bHeight, [6, 6, 2, 2]);
+          ctx.fill();
+
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.arc(px - bWidth * 0.3, trackY - 6, 6, 0, Math.PI * 2);
+          ctx.arc(px + bWidth * 0.3, trackY - 6, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Labels
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, px, topY - 6);
+        ctx.fillText(mass + ' kg', px, topY + 14);
+
+        // Momentum vector arrow
+        const curP = mass * velocity;
+        if (Math.abs(curP) > 0.1) {
+          const arrowLen = Math.max(-120, Math.min(120, curP * 2));
+          ctx.strokeStyle = '#059669';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(px, topY - 18);
+          ctx.lineTo(px + arrowLen, topY - 18);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      const l1 = (objectVisual1 === 'ball' ? '⚽ Bola' : objectVisual1 === 'runner' ? '🏃 Pelari' : objectVisual1 === 'car' ? '🚗 Mobil' : objectVisual1 === 'truck' ? '🚛 Truk' : objectVisual1 === 'bullet' ? '🔫 Peluru' : '🛒 Troli') + ' 1';
+      drawSimObject(pos1, simM1, vel1, '#4f46e5', l1, objectVisual1);
+      if (simMode === 'two_carts') {
+        const l2 = (objectVisual2 === 'ball' ? '⚽ Bola' : objectVisual2 === 'runner' ? '🏃 Pelari' : objectVisual2 === 'car' ? '🚗 Mobil' : objectVisual2 === 'truck' ? '🚛 Truk' : objectVisual2 === 'bullet' ? '🔫 Peluru' : '🛒 Troli') + ' 2';
+        drawSimObject(pos2, simM2, vel2, '#0284c7', l2, objectVisual2);
+      }
+
+      ctx.restore();
+
+      // Update HUD
+      const p1 = simM1 * vel1;
+      const p2 = simM2 * vel2;
+      document.getElementById('hud-benda1').textContent = `Benda 1: p = ${p1.toFixed(1)} kg·m/s`;
+      if (simMode === 'two_carts') {
+        document.getElementById('hud-benda2').textContent = `Benda 2: p = ${p2.toFixed(1)} kg·m/s`;
+        document.getElementById('hud-total').textContent = `Total Σp = ${(p1 + p2).toFixed(1)} kg·m/s`;
+      }
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // ==================== KUIS LOGIC ====================
+    const quizData = [
+      {
+        q: "Dua mobil bermassa sama bergerak dengan kelajuan sama (20 m/s). Mobil A ke Timur, Mobil B ke Utara. Apakah momentum kedua mobil sama?",
+        opts: ["Sama, karena kelajuannya sama", "Berbeda, karena momentum adalah besaran vektor dengan arah", "Sama besar dan searah", "Tidak dapat dihitung"],
+        ans: 1,
+        exp: "Momentum adalah besaran VEKTOR (p = m · v). Meskipun besar momentumnya sama, arahnya berbeda (Timur vs Utara) sehingga vektor momentumnya tidak sama."
+      },
+      {
+        q: "Sebuah bola bisbol 0,15 kg dilempar 40 m/s, dan bola bowling 6 kg menggelinding 1 m/s. Bagaimana momentum keduanya?",
+        opts: ["Bola bowling lebih besar", "Keduanya memiliki momentum sama besar (6 kg·m/s)", "Bola bisbol lebih besar", "Tidak dapat dibandingkan"],
+        ans: 1,
+        exp: "p_bisbol = 0,15 × 40 = 6 kg·m/s. p_bowling = 6 × 1 = 6 kg·m/s. Keduanya memiliki momentum yang sama persis!"
+      },
+      {
+        q: "Mengapa atlet lompat tinggi mendarat di matras busa tebal daripada lantai keras ditinjau dari Impuls (I = F · Δt)?",
+        opts: ["Matras memperkecil perubahan momentum Δp", "Matras memperpanjang waktu kontak Δt sehingga gaya benturan F berkurang", "Matras menghilangkan gravitasi", "Matras memperbesar impuls"],
+        ans: 1,
+        exp: "F = Δp / Δt. Matras busa tebal memperpanjang waktu kontak (Δt jauh lebih lama), sehingga gaya benturan rata-rata (F) menjadi jauh lebih kecil dan aman."
+      },
+      {
+        q: "Troli 1 (2 kg, 6 m/s) menabrak troli 2 (2 kg, diam). Jika tumbukan tidak lenting sama sekali (e = 0), berapakah kecepatan bersama keduanya?",
+        opts: ["3 m/s", "6 m/s", "0 m/s", "1,5 m/s"],
+        ans: 0,
+        exp: "Σp_awal = Σp_akhir ⟹ (2)(6) + (2)(0) = (2 + 2)v' ⟹ 12 = 4v' ⟹ v' = 3 m/s."
+      },
+      {
+        q: "Bola 0,5 kg bergerak +10 m/s menabrak dinding dan memantul -10 m/s. Berapakah perubahan momentum (Δp) bola?",
+        opts: ["0 kg·m/s", "-10 kg·m/s", "+5 kg·m/s", "-5 kg·m/s"],
+        ans: 1,
+        exp: "Δp = p_akhir - p_awal = (0,5 × -10) - (0,5 × +10) = -5 - (+5) = -10 kg·m/s."
+      }
+    ];
+
+    let quizAnswers = {};
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+
+      let score = 0;
+      quizData.forEach((item, qIdx) => {
+        const userChoice = quizAnswers[qIdx];
+        if (userChoice !== undefined && userChoice === item.ans) score++;
+
+        const qCard = document.createElement('div');
+        qCard.className = 'space-y-3 pb-5 border-b border-slate-100 last:border-b-0';
+
+        let html = `<h4 class="font-bold text-slate-900 text-sm">${qIdx + 1}. ${item.q}</h4><div class="space-y-2">`;
+
+        item.opts.forEach((opt, optIdx) => {
+          let optClass = 'p-3 rounded-xl border text-xs font-medium w-full text-left transition-all';
+          if (userChoice !== undefined) {
+            if (optIdx === item.ans) {
+              optClass += ' bg-emerald-50 border-emerald-500 text-emerald-950 font-bold';
+            } else if (optIdx === userChoice && userChoice !== item.ans) {
+              optClass += ' bg-rose-50 border-rose-500 text-rose-950 font-bold';
+            } else {
+              optClass += ' bg-white border-slate-200 text-slate-400 opacity-60';
+            }
+          } else {
+            optClass += ' bg-white border-slate-200 text-slate-800 hover:border-indigo-400 hover:bg-slate-50';
+          }
+
+          html += `<button onclick="answerQuiz(${qIdx}, ${optIdx})" ${userChoice !== undefined ? 'disabled' : ''} class="${optClass}">${String.fromCharCode(65 + optIdx)}. ${opt}</button>`;
+        });
+
+        html += '</div>';
+
+        if (userChoice !== undefined) {
+          html += `
+            <div class="p-3.5 rounded-xl text-xs space-y-1 ${userChoice === item.ans ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'}">
+              <span class="font-bold block">${userChoice === item.ans ? '✅ Jawaban Benar!' : '💡 Pembahasan Konsep:'}</span>
+              <p class="leading-relaxed">${item.exp}</p>
+            </div>
+          `;
+        }
+
+        qCard.innerHTML = html;
+        container.appendChild(qCard);
+      });
+
+      document.getElementById('quiz-score-badge').textContent = `Skor: ${score} / ${quizData.length}`;
+    }
+
+    function answerQuiz(qIdx, optIdx) {
+      quizAnswers[qIdx] = optIdx;
+      renderQuiz();
+    }
+
+    // Init
+    renderCalculator();
+    renderQuiz();
+  </script>
+</body>
+</html>

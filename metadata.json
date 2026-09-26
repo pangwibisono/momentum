@@ -1,0 +1,8 @@
+{
+  "name": "Simulasi Fisika: Momentum, Impuls & Tumbukan",
+  "description": "Media pembelajaran fisika interaktif untuk microteaching guru: kalkulator dinamis p=mv, simulasi visual vektor gerak 2D, dan kuis studi kasus.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
